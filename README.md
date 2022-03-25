@@ -1,5 +1,6 @@
 # wa2-hub-editor
 Hub Editor/Creator for old WA2 Hubs
+(The Editor is forked from: https://github.com/nasko222/wa096-mofi-better-editors)
 
 Contains the whole editor and playable exe.
 

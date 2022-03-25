@@ -11,7 +11,7 @@
 
 Include "particles-define.bb"
 
-Global VersionText$="WA2 Hub Editor v1.0 (experimental)"
+Global VersionText$="WA2 Hub Editor v1.01 (experimental)"
 
 Global MASTERUSER=True
 Global LeftMouse,LeftMouseReleased,RightMouse,RightMouseReleased
@@ -23,7 +23,7 @@ Global EditorMode=0		;0-level, 1-textures, 2-sidetextures, 3-objects
 						;8-master edit screen
 						;9-dialog edit screen
 						
-AppTitle "WA2 Hub Editor v1.0 (experimental)"
+AppTitle "WA2 Hub Editor v1.01 (experimental)"
 ; EDITOR DIALOG DATA
 
 Global CurrentDialog
@@ -9728,22 +9728,9 @@ Function AdventureSelectScreen()
 	
 	
 	If MouseDown(1)
-		If mx>650 And my>560
-			; change user
-			StartUserSelectScreen()
-			Repeat
-			Until MouseDown(1)=0
-		EndIf
 
 		
 	
-			GetCurrentAdventures()
-
-		
-		
-
-		
-		
 		If (mx<50 Or mx>748) And my>175 And my<235
 			; Page Up
 			AdventureFileNamesListedStart=AdventureFileNamesListedStart-19
@@ -9763,7 +9750,9 @@ Function AdventureSelectScreen()
 		
 			Repeat
 			Until MouseDown(1)=0
-			EditorMode=6
+			
+			AdventureFileName$=AdventureFileNamesListed$(AdventureNameSelected+AdventureFileNamesListedStart)
+			StartMaster()
 		EndIf
 
 	EndIf
@@ -9805,12 +9794,6 @@ Function AdventureSelectScreen2()
 		Else
 			DisplayText2("EDIT",20,9,155,155,155)
 		EndIf
-	EndIf
-	
-	If Selected=3
-		DisplayText2("CANCEL",19,15,255,255,255)
-	Else
-		DisplayText2("CANCEL",19,15,155,155,155)
 	EndIf
 
 	If MouseDown(1)
@@ -10100,14 +10083,6 @@ Function MasterMainLoop()
 		DisplayText2(WinningCondition$(AdventureGoal),0,17,255,255,255)
 		DisplayText2("--------------------------------------",0,18,255,255,0)
 		
-		;DisplayText2(":Gate/Keys",25,13,255,255,0)
-		;DisplayText2(":Version #",25,14,255,255,255)
-		;DisplayText2(Str$(GateKeyVersion),35,14,255,255,255)
-
-		
-		DisplayText2(":Custom Icons",25,16,255,255,0)
-		DisplayText2(":",25,17,255,255,0)
-		DisplayText2(Left$(CustomIconName$,12),26,17,255,255,255)
 	; PUT BACK IN FOR ME
 	
 		If MASTERUSER=True
@@ -10130,19 +10105,12 @@ Function MasterMainLoop()
 		DisplayText2("--------------------------------------",0,25,255,255,0)
 	
 		
-		DisplayText2(" ==========      ==========      ==========",0,26,155,155,0)
-		DisplayText2(" :        :      :        :      :        :",0,27,155,155,0)
-		DisplayText2(" :        :      :        :      :        :",0,28,155,155,0)
-		DisplayText2(" ==========      ==========      ==========",0,29,155,155,0)
+		DisplayText2("                 ==========                ",0,26,155,155,0)
+		DisplayText2("                 :        :                ",0,27,155,155,0)
+		DisplayText2("                 :        :                ",0,28,155,155,0)
+		DisplayText2("                 ==========                ",0,29,155,155,0)
 		
 		
-		If MouseY()>550 And MouseX()<250
-			DisplayText2("CANCEL",3,27,255,255,255)
-			DisplayText2("+EXIT",3.5,28,255,255,255)
-		Else
-			DisplayText2("CANCEL",3,27,155,155,0)
-			DisplayText2("+EXIT",3.5,28,155,155,0)
-		EndIf
 
 		If MouseY()>550 And MouseX()>250 And MouseX()<550		
 			DisplayText2(" SAVE",19,27,255,255,255)
@@ -10449,58 +10417,6 @@ Function MasterMainLoop()
 			Delay 200
 		EndIf
 		
-		; GateKeyVersion
-		If MouseY()>500+32-260 And MouseY()<523+42-260 And MouseX()>480 And MouseX()<700
-			If mb=1 GateKeyVersion=GateKeyVersion+1
-			If mb=2 GateKeyVersion=GateKeyVersion-1
-			If GateKeyVersion=0 Then GateKeyVersion=3
-			If GateKeyVersion=4 Then GateKeyVersion=1
-			Delay 200
-			FreeTexture buttontexture
-			FreeTexture gatetexture
-			ButtonTexture=MyLoadTexture("data\graphics\buttons"+Str$(GateKeyVersion)+".bmp",4)
-			GateTexture=MyLoadTexture("data\graphics\gates"+Str$(GateKeyVersion)+".bmp",1)
-			
-			
-		EndIf
-
-		
-		; custom icon
-		If MouseY()>500+32-200 And MouseY()<523+42-200 And MouseX()>480 And MouseX()<700
-			
-			FreeTexture IconTextureCustom
-			IconTextureCustom=0
-			
-			Locate 0,0
-			Color 0,0,0
-			Rect 0,0,500,40,True
-			Color 255,255,255
-			CustomIconName$=Input$( "Enter Custom Icon Texture Name (e.g. 'standard'):")
-						
-			If CustomIconName$="" Or CustomIconName$="Standard"
-				CustomIconName$="Standard"
-			Else
-				If FileType(globaldirname$+"\Custom Content\Icons\icons "+CustomIconName$+".bmp")<>1
-					Locate 0,0
-					Color 0,0,0
-					Rect 0,0,500,60,True
-					Color 255,255,0
-					Print "Error: Custom Icon File '"+customiconname$+"' not found."
-					Print "Reverting to 'Standard' Custom Icon Texture."
-					Delay 2000	
-					
-					CustomIconName$="Standard"
-				EndIf
-				
-			EndIf
-
-			IconTextureCustom=myLoadTexture(globaldirname$+"\Custom Content\Icons\icons "+customiconname$+".bmp",4)
-
-
-
-		EndIf
-
-		
 		; load level
 		For i=1 To 20
 			If MouseX()>700 And MouseX()<750 And MouseY()>62+i*20 And MouseY()<=82+i*20
@@ -10596,12 +10512,7 @@ Function MasterMainLoop()
 		
 		
 
-		If MouseY()>550 And MouseX()<250	
-			DisplayText2(">       <",1.5,27,255,255,0)
-			DisplayText2(">       <",1.5,28,255,255,0)
-			WaitFlag=True
-			StartAdventureSelectScreen()
-		EndIf
+
 		
 		If MouseY()>550 And MouseX()>250 And MouseX()<550
 			DisplayText2(">       <",17.5,27,255,255,0)
